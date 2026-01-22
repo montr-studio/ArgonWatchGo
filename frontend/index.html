@@ -11,7 +11,8 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/graph-tabs.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
 <body class="dark-theme">
@@ -121,6 +122,168 @@
                 </div>
             </section>
 
+            <!-- Temperature Monitoring -->
+            <section class="card temp-card" id="temp-card" style="display: none;">
+                <div class="card-header">
+                    <h2>🌡️ Temperature Sensors</h2>
+                    <span class="refresh-rate">
+                        <span class="live-dot"></span>
+                        Live
+                    </span>
+                </div>
+                <div class="temp-grid">
+                    <div class="temp-item">
+                        <div class="temp-label">CPU Temperature</div>
+                        <div class="temp-value" id="cpu-temp">--°C</div>
+                        <div class="temp-bar">
+                            <div class="temp-fill" id="cpu-temp-fill"></div>
+                        </div>
+                    </div>
+                    <div id="gpu-temps-container"></div>
+                    <div id="disk-temps-container"></div>
+                </div>
+            </section>
+
+            <!-- Detailed CPU Metrics -->
+            <section class="card cpu-details-card">
+                <div class="card-header">
+                    <h2>⚙️ CPU Details</h2>
+                </div>
+                <div class="cpu-details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Load Average (1m / 5m / 15m)</span>
+                        <span class="detail-value" id="load-averages">-- / -- / --</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Current Speed</span>
+                        <span class="detail-value" id="cpu-current-speed">-- GHz</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Physical Cores</span>
+                        <span class="detail-value" id="cpu-physical-cores">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Logical Cores</span>
+                        <span class="detail-value" id="cpu-logical-cores">--</span>
+                    </div>
+                </div>
+                <div class="per-core-section" id="per-core-section" style="display: none;">
+                    <h3>Per-Core Loads</h3>
+                    <div class="cores-grid" id="cores-grid"></div>
+                </div>
+            </section>
+
+            <!-- Enhanced Memory & Disk I/O -->
+            <div class="metrics-row">
+                <section class="card memory-details-card">
+                    <div class="card-header">
+                        <h2>💾 Memory Details</h2>
+                    </div>
+                    <div class="memory-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Active Memory</span>
+                            <span class="detail-value" id="mem-active">-- GB</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Cached</span>
+                            <span class="detail-value" id="mem-cached">-- GB</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Buffers</span>
+                            <span class="detail-value" id="mem-buffers">-- GB</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Swap Used</span>
+                            <span class="detail-value" id="swap-used">-- GB</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Swap Total</span>
+                            <span class="detail-value" id="swap-total">-- GB</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Swap Usage</span>
+                            <span class="detail-value" id="swap-percentage">--%</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card diskio-card">
+                    <div class="card-header">
+                        <h2>💿 Disk I/O</h2>
+                    </div>
+                    <div class="diskio-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Read Speed</span>
+                            <span class="detail-value" id="disk-read-speed">-- MB/s</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Write Speed</span>
+                            <span class="detail-value" id="disk-write-speed">-- MB/s</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total I/O</span>
+                            <span class="detail-value" id="disk-total-io">-- MB/s</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Network Details -->
+            <section class="card network-details-card">
+                <div class="card-header">
+                    <h2>🌐 Network Interfaces</h2>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Interface</th>
+                                <th>Status</th>
+                                <th>RX Speed</th>
+                                <th>TX Speed</th>
+                                <th>RX Errors</th>
+                                <th>TX Errors</th>
+                                <th>Dropped Packets</th>
+                            </tr>
+                        </thead>
+                        <tbody id="network-table-body">
+                            <tr>
+                                <td colspan="7" style="text-align: center; color: var(--text-secondary);">
+                                    Loading network data...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Disk Health -->
+            <section class="card disk-health-card" id="disk-health-card" style="display: none;">
+                <div class="card-header">
+                    <h2>🔧 Disk Health (SMART)</h2>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>SMART Status</th>
+                                <th>Temperature</th>
+                            </tr>
+                        </thead>
+                        <tbody id="disk-health-body">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-secondary);">
+                                    Loading disk health data...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- PM2 Processes -->
             <section class="card pm2-card">
                 <div class="card-header">
@@ -143,6 +306,62 @@
                             <tr>
                                 <td colspan="6" style="text-align: center; color: var(--text-secondary);">
                                     No PM2 processes detected
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Historical Graphs -->
+            <section class="card graphs-card">
+                <div class="card-header">
+                    <h2>📈 Historical Data</h2>
+                    <div class="graph-tabs">
+                        <button class="graph-tab active" data-graph="cpu">CPU</button>
+                        <button class="graph-tab" data-graph="memory">Memory</button>
+                        <button class="graph-tab" data-graph="network">Network</button>
+                        <button class="graph-tab" data-graph="temperature">Temperature</button>
+                    </div>
+                </div>
+                <div class="graph-container">
+                    <canvas id="history-chart" style="height: 300px;"></canvas>
+                </div>
+            </section>
+
+            <!-- Active Alerts -->
+            <section class="card alerts-card" id="alerts-card" style="display: none;">
+                <div class="card-header">
+                    <h2>🚨 Active Alerts</h2>
+                    <button class="btn-text" id="alerts-history-btn">View History</button>
+                </div>
+                <div id="active-alerts-container">
+                    <p style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                        No active alerts
+                    </p>
+                </div>
+            </section>
+
+            <!-- Service Health -->
+            <section class="card services-card" id="services-card" style="display: none;">
+                <div class="card-header">
+                    <h2>🔍 Service Health</h2>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Response Time</th>
+                                <th>Last Check</th>
+                            </tr>
+                        </thead>
+                        <tbody id="services-table-body">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-secondary);">
+                                    No services configured
                                 </td>
                             </tr>
                         </tbody>

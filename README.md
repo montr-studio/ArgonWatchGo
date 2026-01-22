@@ -1,30 +1,59 @@
-# Server Monitor
+# ArgonWatch - Server Monitor
 
-A lightweight, self-hostable server monitoring tool with minimal resource usage.
+A lightweight, self-hostable server monitoring tool with comprehensive metrics and minimal resource usage.
 
 ## Features
 
-✅ **System Resource Monitoring**
-- Real-time CPU, Memory, Disk, and Network monitoring
-- Live charts and visualizations
-- Historical data storage (7 days retention)
+### ✅ **Enhanced System Resource Monitoring**
+- **Real-time CPU monitoring** with per-core loads and load averages (1m, 5m, 15m)
+- **Detailed memory metrics** including active, cached, buffers, and swap usage
+- **Disk I/O performance** tracking with read/write speeds (MB/s)
+- **Network interface monitoring** with bandwidth, errors, and packet loss tracking
+- **Live charts and visualizations** with color-coded status indicators
+- **Historical data storage** (7 days retention) for trend analysis
 
-✅ **GitHub Actions Runner Status**
-- Monitor self-hosted runner status (Idle/Active/Offline)
-- View live terminal logs during job execution
-- Track current job and duration
+### 🌡️ **Hardware Health Monitoring**
+- **Temperature sensors** for CPU, GPU, and disk drives
+- **SMART disk health** status and failure prediction
+- **GPU metrics** including utilization, VRAM usage, and fan speeds
+- **Fan speed monitoring** for cooling system health
+- **Color-coded warnings** (Green < 60°C, Yellow < 80°C, Red > 80°C)
 
-✅ **PM2 Process Management**
+### ⚙️ **Detailed CPU Insights**
+- **Per-core CPU loads** with individual utilization bars
+- **Current CPU frequency** monitoring across all cores
+- **Load averages** for system load trend analysis
+- **Physical and logical core** count display
+
+### 💾 **Advanced Memory Analytics**
+- **Active memory** usage tracking
+- **Cache and buffer** memory breakdown
+- **Swap memory** utilization and percentage
+- **Real-time memory** allocation visualization
+
+### 💿 **Disk Performance & Health**
+- **Real-time I/O speeds** (read/write MB/s)
+- **SMART health status** for early failure detection
+- **Disk temperature** monitoring per drive
+- **Usage percentage** across all partitions
+
+### 🌐 **Network Interface Details**
+- **Per-interface statistics** (RX/TX speeds)
+- **Error counters** (RX errors, TX errors)
+- **Dropped packet** tracking
+- **Interface status** monitoring (up/down)
+
+### 📊 **PM2 Process Management**
 - View all PM2 processes in a table
 - Monitor status, uptime, restarts, CPU, and memory
 - Quick actions (restart, stop) via GUI buttons
 
-✅ **Web-Based Terminal** (Coming Soon)
-- Full terminal access via browser
-- No SSH port 22 required
-- Secure WebSocket communication
+### 🏃 **GitHub Actions Runner Status**
+- Monitor self-hosted runner status (Idle/Active/Offline)
+- View live terminal logs during job execution
+- Track current job and duration
 
-✅ **Quick Commands**
+### ⚡ **Quick Commands**
 - Pre-defined command buttons for common tasks
 - Configurable in `config/config.json`
 - Confirmation dialogs for destructive actions

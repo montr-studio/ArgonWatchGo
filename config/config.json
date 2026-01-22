@@ -6,13 +6,89 @@
     "monitoring": {
         "systemInterval": 2000,
         "runnerInterval": 5000,
-        "pm2Interval": 5000
+        "pm2Interval": 5000,
+        "servicesInterval": 30000
     },
     "storage": {
         "enabled": true,
         "retentionDays": 7,
         "dataPath": "../data"
     },
+    "alerts": {
+        "enabled": true,
+        "rules": [
+            {
+                "id": "cpu-critical",
+                "name": "Critical CPU Usage",
+                "metric": "cpu.load",
+                "condition": ">",
+                "threshold": 95,
+                "duration": 60000,
+                "severity": "critical",
+                "enabled": true,
+                "notifications": [
+                    "desktop"
+                ]
+            },
+            {
+                "id": "memory-high",
+                "name": "High Memory Usage",
+                "metric": "memory.percentage",
+                "condition": ">",
+                "threshold": 90,
+                "duration": 120000,
+                "severity": "warning",
+                "enabled": true,
+                "notifications": [
+                    "desktop"
+                ]
+            },
+            {
+                "id": "disk-full",
+                "name": "Disk Space Critical",
+                "metric": "disk.0.use",
+                "condition": ">",
+                "threshold": 95,
+                "duration": 0,
+                "severity": "critical",
+                "enabled": true,
+                "notifications": [
+                    "desktop"
+                ]
+            }
+        ]
+    },
+    "notifications": {
+        "desktop": {
+            "enabled": true
+        },
+        "email": {
+            "enabled": false,
+            "smtp": {
+                "host": "smtp.gmail.com",
+                "port": 587,
+                "secure": false,
+                "auth": {
+                    "user": "your-email@gmail.com",
+                    "pass": "your-app-password"
+                }
+            },
+            "from": "ArgonWatch <alerts@example.com>",
+            "to": [
+                "admin@example.com"
+            ]
+        },
+        "discord": {
+            "enabled": false,
+            "webhookUrl": "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL"
+        },
+        "slack": {
+            "enabled": false,
+            "webhookUrl": "https://hooks.slack.com/services/YOUR_WEBHOOK_URL"
+        }
+    },
+    "services": [],
+    "databases": [],
     "githubRunner": {
         "runnerPath": "/home/runner/actions-runner",
         "logPath": "/home/runner/actions-runner/_diag",

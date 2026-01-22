@@ -6,6 +6,14 @@ class App {
         this.ws = new WebSocketClient(`ws://${window.location.host}`);
         this.gauges = {};
         this.networkHistory = { rx: 0, tx: 0 };
+        this.currentChart = null;
+        this.currentGraphType = 'cpu';
+        this.historicalData = {
+            cpu: { labels: [], data: [] },
+            memory: { labels: [], data: [] },
+            network: { labels: [], datasets: [[], []] },
+            temperature: { labels: [], data: [] }
+        };
         this.init();
     }
 
@@ -13,6 +21,7 @@ class App {
         this.setupWebSocket();
         this.setupUI();
         this.initializeGauges();
+        this.initializeChart();
     }
 
     initializeGauges() {
@@ -128,6 +137,200 @@ class App {
                 terminalToggle.textContent = terminal.classList.contains('collapsed') ? 'Expand' : 'Collapse';
             });
         }
+
+        // Graph tabs
+        const graphTabs = document.querySelectorAll('.graph-tab');
+        graphTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update active tab
+                graphTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Switch graph
+                this.currentGraphType = tab.dataset.graph;
+                this.updateHistoricalChart();
+            });
+        });
+    }
+
+    initializeChart() {
+        const ctx = document.getElementById('history-chart');
+        if (!ctx) return;
+
+        this.currentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'CPU Usage (%)',
+                    data: [],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary')
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary'),
+                            maxRotation: 0,
+                            maxTicksLimit: 10
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    updateHistoricalChart() {
+        if (!this.currentChart) return;
+
+        const data = this.historicalData[this.currentGraphType];
+
+        // Update chart based on type
+        switch (this.currentGraphType) {
+            case 'cpu':
+                this.currentChart.data.labels = data.labels;
+                this.currentChart.data.datasets = [{
+                    label: 'CPU Usage (%)',
+                    data: data.data,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }];
+                this.currentChart.options.scales.y.max = 100;
+                break;
+
+            case 'memory':
+                this.currentChart.data.labels = data.labels;
+                this.currentChart.data.datasets = [{
+                    label: 'Memory Usage (%)',
+                    data: data.data,
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }];
+                this.currentChart.options.scales.y.max = 100;
+                break;
+
+            case 'network':
+                this.currentChart.data.labels = data.labels;
+                this.currentChart.data.datasets = [
+                    {
+                        label: 'Download (MB/s)',
+                        data: data.datasets[0],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Upload (MB/s)',
+                        data: data.datasets[1],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }
+                ];
+                delete this.currentChart.options.scales.y.max;
+                break;
+
+            case 'temperature':
+                this.currentChart.data.labels = data.labels;
+                this.currentChart.data.datasets = [{
+                    label: 'CPU Temperature (°C)',
+                    data: data.data,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }];
+                this.currentChart.options.scales.y.max = 100;
+                break;
+        }
+
+        this.currentChart.update();
+    }
+
+    addHistoricalDataPoint(cpuLoad, memPercent, networkRx, networkTx, cpuTemp) {
+        const timestamp = new Date().toLocaleTimeString();
+        const maxPoints = 60; // Keep last 60 points
+
+        // CPU
+        this.historicalData.cpu.labels.push(timestamp);
+        this.historicalData.cpu.data.push(cpuLoad);
+        if (this.historicalData.cpu.labels.length > maxPoints) {
+            this.historicalData.cpu.labels.shift();
+            this.historicalData.cpu.data.shift();
+        }
+
+        // Memory
+        this.historicalData.memory.labels.push(timestamp);
+        this.historicalData.memory.data.push(memPercent);
+        if (this.historicalData.memory.labels.length > maxPoints) {
+            this.historicalData.memory.labels.shift();
+            this.historicalData.memory.data.shift();
+        }
+
+        // Network
+        this.historicalData.network.labels.push(timestamp);
+        this.historicalData.network.datasets[0].push(networkRx);
+        this.historicalData.network.datasets[1].push(networkTx);
+        if (this.historicalData.network.labels.length > maxPoints) {
+            this.historicalData.network.labels.shift();
+            this.historicalData.network.datasets[0].shift();
+            this.historicalData.network.datasets[1].shift();
+        }
+
+        // Temperature
+        if (cpuTemp !== null) {
+            this.historicalData.temperature.labels.push(timestamp);
+            this.historicalData.temperature.data.push(cpuTemp);
+            if (this.historicalData.temperature.labels.length > maxPoints) {
+                this.historicalData.temperature.labels.shift();
+                this.historicalData.temperature.data.shift();
+            }
+        }
+
+        // Update current chart
+        this.updateHistoricalChart();
     }
 
     showModal(title, message, onConfirm) {
@@ -162,9 +365,9 @@ class App {
         }
 
         // Update CPU gauge
-        const cpuLoad = Math.round(data.cpu.load);
-        this.gauges.cpu.update(cpuLoad);
-        document.getElementById('cpu-gauge-value').textContent = `${cpuLoad}%`;
+        const cpuPercent = Math.round(data.cpu.load);
+        this.gauges.cpu.update(cpuPercent);
+        document.getElementById('cpu-gauge-value').textContent = `${cpuPercent}%`;
 
         // Update RAM gauge
         const ramPercent = Math.round(data.memory.percentage || 0);
@@ -191,6 +394,172 @@ class App {
             this.gauges.network.update(networkPercent);
             document.getElementById('network-gauge-value').textContent = `${totalMBps} MB/s`;
         }
+
+        // === NEW: Update Temperature Sensors ===
+        if (data.temperatures && data.temperatures.main !== null) {
+            const tempCard = document.getElementById('temp-card');
+            tempCard.style.display = 'block';
+
+            const cpuTemp = Math.round(data.temperatures.main);
+            document.getElementById('cpu-temp').textContent = `${cpuTemp}°C`;
+
+            // Color-coded temperature bar
+            const tempFill = document.getElementById('cpu-temp-fill');
+            const tempPercent = Math.min((cpuTemp / 100) * 100, 100);
+            tempFill.style.width = `${tempPercent}%`;
+
+            if (cpuTemp < 60) {
+                tempFill.style.backgroundColor = '#10b981'; // Green
+            } else if (cpuTemp < 80) {
+                tempFill.style.backgroundColor = '#f59e0b'; // Yellow
+            } else {
+                tempFill.style.backgroundColor = '#ef4444'; // Red
+            }
+
+            // GPU temperatures
+            if (data.temperatures.gpu && data.temperatures.gpu.length > 0) {
+                const gpuContainer = document.getElementById('gpu-temps-container');
+                gpuContainer.innerHTML = data.temperatures.gpu.map((gpu, idx) => {
+                    const temp = gpu.temperature ? Math.round(gpu.temperature) : '--';
+                    const fanSpeed = gpu.fanSpeed ? Math.round(gpu.fanSpeed) : '--';
+                    return `
+                        <div class="temp-item">
+                            <div class="temp-label">GPU ${idx + 1} (${gpu.model || 'Unknown'})</div>
+                            <div class="temp-value">${temp}°C | Fan: ${fanSpeed}%</div>
+                            <div class="temp-bar">
+                                <div class="temp-fill" style="width: ${Math.min(temp, 100)}%; background-color: ${temp < 70 ? '#10b981' : temp < 85 ? '#f59e0b' : '#ef4444'};"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // === NEW: Update CPU Details ===
+        if (data.cpu) {
+            // Load averages (show 0.00 on Windows where not supported)
+            const la1 = data.cpu.loadAverage1 ? data.cpu.loadAverage1.toFixed(2) : '0.00';
+            const la5 = data.cpu.loadAverage5 ? data.cpu.loadAverage5.toFixed(2) : '0.00';
+            const la15 = data.cpu.loadAverage15 ? data.cpu.loadAverage15.toFixed(2) : '0.00';
+            document.getElementById('load-averages').textContent = `${la1} / ${la5} / ${la15}`;
+
+            // Current speed
+            const speed = data.cpu.avgSpeed ? data.cpu.avgSpeed.toFixed(2) : data.cpu.speed;
+            document.getElementById('cpu-current-speed').textContent = `${speed} GHz`;
+
+            // Core counts
+            document.getElementById('cpu-physical-cores').textContent = data.cpu.physicalCores || data.cpu.cores;
+            document.getElementById('cpu-logical-cores').textContent = data.cpu.cores;
+
+            // Per-core loads
+            if (data.cpu.coreLoads && data.cpu.coreLoads.length > 0) {
+                const perCoreSection = document.getElementById('per-core-section');
+                perCoreSection.style.display = 'block';
+
+                const coresGrid = document.getElementById('cores-grid');
+                coresGrid.innerHTML = data.cpu.coreLoads.map((core, idx) => {
+                    const load = Math.round(core.load);
+                    return `
+                        <div class="core-item">
+                            <div class="core-label">Core ${idx}</div>
+                            <div class="core-bar">
+                                <div class="core-fill" style="width: ${load}%; background-color: ${load < 70 ? '#3b82f6' : load < 90 ? '#f59e0b' : '#ef4444'};"></div>
+                            </div>
+                            <div class="core-value">${load}%</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // === NEW: Update Memory Details ===
+        if (data.memory) {
+            // Helper to safely format memory values (handle NaN/null/undefined)
+            const formatMem = (val) => ((val || 0) / 1024 / 1024 / 1024).toFixed(2);
+            const formatPct = (val) => Math.round(val || 0);
+
+            document.getElementById('mem-active').textContent = `${formatMem(data.memory.active)} GB`;
+            document.getElementById('mem-cached').textContent = `${formatMem(data.memory.cached)} GB`;
+            document.getElementById('mem-buffers').textContent = `${formatMem(data.memory.buffers)} GB`;
+            document.getElementById('swap-used').textContent = `${formatMem(data.memory.swapUsed)} GB`;
+            document.getElementById('swap-total').textContent = `${formatMem(data.memory.swapTotal)} GB`;
+            document.getElementById('swap-percentage').textContent = `${formatPct(data.memory.swapPercentage)}%`;
+        }
+
+        // === NEW: Update Disk I/O ===
+        if (data.diskIO) {
+            const readSpeed = (data.diskIO.rx_sec / 1024 / 1024).toFixed(2);
+            const writeSpeed = (data.diskIO.wx_sec / 1024 / 1024).toFixed(2);
+            const totalIO = (parseFloat(readSpeed) + parseFloat(writeSpeed)).toFixed(2);
+
+            document.getElementById('disk-read-speed').textContent = `${readSpeed} MB/s`;
+            document.getElementById('disk-write-speed').textContent = `${writeSpeed} MB/s`;
+            document.getElementById('disk-total-io').textContent = `${totalIO} MB/s`;
+        }
+
+        // === NEW: Update Network Details Table ===
+        if (data.network && data.network.length > 0) {
+            const networkTableBody = document.getElementById('network-table-body');
+            networkTableBody.innerHTML = data.network.map(iface => {
+                const rxSpeed = (iface.rx_sec / 1024 / 1024).toFixed(2);
+                const txSpeed = (iface.tx_sec / 1024 / 1024).toFixed(2);
+                const statusClass = iface.operstate === 'up' ? 'status-active' : 'status-offline';
+
+                return `
+                    <tr>
+                        <td><strong>${iface.iface}</strong></td>
+                        <td><span class="runner-status-badge ${statusClass}">${iface.operstate}</span></td>
+                        <td>${rxSpeed} MB/s</td>
+                        <td>${txSpeed} MB/s</td>
+                        <td>${iface.rx_errors || 0}</td>
+                        <td>${iface.tx_errors || 0}</td>
+                        <td>${(iface.rx_dropped || 0) + (iface.tx_dropped || 0)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // === NEW: Update Disk Health (SMART) ===
+        if (data.diskHealth && data.diskHealth.length > 0) {
+            const hasSmartData = data.diskHealth.some(disk => disk.smartStatus !== 'unknown');
+            if (hasSmartData) {
+                const diskHealthCard = document.getElementById('disk-health-card');
+                diskHealthCard.style.display = 'block';
+
+                const diskHealthBody = document.getElementById('disk-health-body');
+                diskHealthBody.innerHTML = data.diskHealth.map(disk => {
+                    const sizeGB = (disk.size / 1024 / 1024 / 1024).toFixed(0);
+                    const statusClass = disk.smartStatus === 'Ok' || disk.smartStatus === 'PASSED' ? 'status-active' :
+                        disk.smartStatus === 'unknown' ? 'status-idle' : 'status-offline';
+                    const temp = disk.temperature ? `${disk.temperature}°C` : '--';
+
+                    return `
+                        <tr>
+                            <td><strong>${disk.device || disk.name}</strong></td>
+                            <td>${disk.type}</td>
+                            <td>${sizeGB} GB</td>
+                            <td><span class="runner-status-badge ${statusClass}">${disk.smartStatus}</span></td>
+                            <td>${temp}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Add data point to historical charts
+        const cpuLoad = Math.round(data.cpu.load);
+        const memPercent = Math.round(data.memory.percentage || 0);
+        const networkRx = data.network && data.network.length > 0
+            ? data.network.reduce((sum, n) => sum + (n.rx_sec || 0), 0) / 1024 / 1024
+            : 0;
+        const networkTx = data.network && data.network.length > 0
+            ? data.network.reduce((sum, n) => sum + (n.tx_sec || 0), 0) / 1024 / 1024
+            : 0;
+        const cpuTemp = data.temperatures && data.temperatures.main !== null
+            ? Math.round(data.temperatures.main)
+            : null;
+
+        this.addHistoricalDataPoint(cpuLoad, memPercent, networkRx, networkTx, cpuTemp);
     }
 
     updatePm2Table(processes) {

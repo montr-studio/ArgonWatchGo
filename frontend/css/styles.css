@@ -639,3 +639,193 @@ body.light-theme .gauge-container canvas {
         gap: 12px;
     }
 }
+
+/* === NEW: Temperature Monitoring === */
+.temp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.temp-item {
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.temp-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.temp-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.temp-bar {
+    width: 100%;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.temp-fill {
+    height: 100%;
+    transition: width 0.5s ease, background-color 0.3s ease;
+    border-radius: 4px;
+}
+
+/* === NEW: CPU Details === */
+.cpu-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Per-Core Section */
+.per-core-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.per-core-section h3 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    color: var(--text-secondary);
+}
+
+.cores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.core-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.core-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.core-bar {
+    width: 100%;
+    height: 6px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.core-fill {
+    height: 100%;
+    transition: width 0.5s ease, background-color 0.3s ease;
+    border-radius: 3px;
+}
+
+.core-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* === NEW: Memory & Disk I/O Row === */
+.metrics-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.memory-details,
+.diskio-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+/* === NEW: Network Details === */
+.network-details-card .data-table th:nth-child(3),
+.network-details-card .data-table th:nth-child(4),
+.network-details-card .data-table td:nth-child(3),
+.network-details-card .data-table td:nth-child(4) {
+    text-align: right;
+}
+
+.network-details-card .data-table th:nth-child(5),
+.network-details-card .data-table th:nth-child(6),
+.network-details-card .data-table th:nth-child(7),
+.network-details-card .data-table td:nth-child(5),
+.network-details-card .data-table td:nth-child(6),
+.network-details-card .data-table td:nth-child(7) {
+    text-align: center;
+}
+
+/* === NEW: Responsive Adjustments === */
+@media (max-width: 768px) {
+    .temp-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cpu-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cores-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .metrics-row {
+        grid-template-columns: 1fr;
+    }
+
+    .memory-details,
+    .diskio-details {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .cores-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .memory-details,
+    .diskio-details {
+        grid-template-columns: 1fr;
+    }
+}
