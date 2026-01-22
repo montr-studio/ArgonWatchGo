@@ -1,0 +1,38 @@
+{
+    "server": {
+        "port": 3000,
+        "host": "0.0.0.0"
+    },
+    "monitoring": {
+        "systemInterval": 2000,
+        "runnerInterval": 5000,
+        "pm2Interval": 5000
+    },
+    "storage": {
+        "enabled": true,
+        "retentionDays": 7,
+        "dataPath": "../data"
+    },
+    "githubRunner": {
+        "runnerPath": "/home/runner/actions-runner",
+        "logPath": "/home/runner/actions-runner/_diag",
+        "runnerUser": "runner"
+    },
+    "pm2": {
+        "pm2User": "root"
+    },
+    "terminal": {
+        "enabled": true,
+        "shell": "powershell.exe",
+        "sessionTimeout": 3600000
+    },
+    "auth": {
+        "enabled": true,
+        "token": "your-secret-token-here-change-this"
+    },
+    "permissions": {
+        "useSudo": false,
+        "runAsUser": "root"
+    },
+    "quickCommands": []
+}
