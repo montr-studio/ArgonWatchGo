@@ -104,7 +104,7 @@
     },
     "auth": {
         "enabled": true,
-        "jwtSecret": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", 
+        "jwtSecret": "SecureRandomKey",
         "tokenExpiration": 24,
         "usersFile": "../data/users.json"
     },
