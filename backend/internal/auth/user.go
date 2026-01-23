@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"os"
@@ -195,7 +196,7 @@ func (s *UserStore) save() error {
 	return os.WriteFile(s.filePath, data, 0600)
 }
 
-// generateID generates a simple unique ID
+// generateID generates a secure unique ID
 func generateID() string {
 	return time.Now().Format("20060102150405") + "-" + randomString(8)
 }
@@ -203,9 +204,12 @@ func generateID() string {
 func randomString(n int) string {
 	const letters = "abcdefghijklmnopqrstuvwxyz0123456789"
 	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		// Fallback to less secure if crypto/rand fails (unlikely)
+		return time.Now().String()
+	}
 	for i := range b {
-		b[i] = letters[time.Now().UnixNano()%int64(len(letters))]
-		time.Sleep(time.Nanosecond)
+		b[i] = letters[int(b[i])%len(letters)]
 	}
 	return string(b)
 }

@@ -79,6 +79,15 @@
                 })
             });
 
+            // Check if setup is locked
+            if (response.status === 403) {
+                showError('Setup has already been completed by another user. Redirecting to login...');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                return;
+            }
+
             const data = await response.json();
 
             if (data.success) {
@@ -118,8 +127,13 @@
         .then(response => response.json())
         .then(data => {
             if (!data.setupRequired) {
-                // Setup already completed, redirect to login
-                window.location.href = '/login.html';
+                // Setup already completed, show message and redirect to login
+                showError('Setup has already been completed. Redirecting to login...');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 2000);
+                // Disable the form
+                setupForm.style.display = 'none';
             }
         })
         .catch(error => {

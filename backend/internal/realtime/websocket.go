@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -11,7 +12,26 @@ import (
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
-		return true // Allow all origins for now
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			return true // No origin header = non-browser client (usually safe)
+		}
+
+		// Allow localhost for development
+		if strings.Contains(origin, "localhost") || strings.Contains(origin, "127.0.0.1") {
+			return true
+		}
+
+		// Strict check: Origin must match Host
+		cleanOrigin := strings.TrimPrefix(origin, "http://")
+		cleanOrigin = strings.TrimPrefix(cleanOrigin, "https://")
+
+		if cleanOrigin == r.Host {
+			return true
+		}
+
+		log.Printf("Security: BLOCKED WebSocket connection from origin %s (Host: %s)", origin, r.Host)
+		return false
 	},
 }
 
@@ -129,24 +149,18 @@ func (c *Client) writePump() {
 	defer func() {
 		c.conn.Close()
 	}()
-	for {
-		select {
-		case message, ok := <-c.send:
-			if !ok {
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				return
-			}
-			w, err := c.conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				return
-			}
-			w.Write(message)
+	for message := range c.send {
+		w, err := c.conn.NextWriter(websocket.TextMessage)
+		if err != nil {
+			return
+		}
+		w.Write(message)
 
-			if err := w.Close(); err != nil {
-				return
-			}
+		if err := w.Close(); err != nil {
+			return
 		}
 	}
+	c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 }
 
 func (c *Client) SendMessage(msgType string, data interface{}) error {

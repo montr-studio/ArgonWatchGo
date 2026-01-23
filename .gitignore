@@ -6,15 +6,16 @@ backend/argon-watch
 backend/argon-watch.exe
 backend/argon-watch-linux
 
-# Data
-data/
+# Data (Ignore all data files and credentials)
+data/*
+backend/data/*
+*.jsonl
+users.json
+
+# Documentation (Exclude all MD except README)
+*.md
+!README.md
+
 
 # Logs
 *.log
-
-# Docs & Plans
-OPTIMIZATION_SUMMARY.md
-GO_MIGRATION_PLAN.md
-GIMINI.md
-OPTIMIZATION_SUMMARY.md
-.gitignore

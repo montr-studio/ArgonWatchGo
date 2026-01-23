@@ -1,6 +1,6 @@
 {
     "server": {
-        "port": 3000,
+        "port": 70010,
         "host": "0.0.0.0"
     },
     "monitoring": {
@@ -104,7 +104,7 @@
     },
     "auth": {
         "enabled": true,
-        "jwtSecret": "SecureRandomKey",
+        "jwtSecret": "change-this-secret-key-in-production",
         "tokenExpiration": 24,
         "usersFile": "../data/users.json"
     },

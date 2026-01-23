@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup - ArgonWatchGo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/theme.js"></script>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-toggle-wrapper">
+                <button id="theme-toggle" class="icon-btn" title="Toggle Theme">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12Z"
+                            stroke="currentColor" stroke-width="2" />
+                        <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    ArgonWatchGo
+                </div>
+                <h1 class="auth-title">Initial Setup</h1>
+                <p class="auth-subtitle">Create your admin account to get started</p>
+            </div>
+
+            <div id="error-message" class="error-message"></div>
+
+            <form id="setup-form">
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" id="username" class="form-input" placeholder="Choose a username" required
+                        autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Choose a strong password"
+                        required autocomplete="new-password">
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="password-strength-bar"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" class="form-input" placeholder="Confirm your password"
+                        required autocomplete="new-password">
+                </div>
+                <div class="form-checkbox">
+                    <input type="checkbox" id="enable-2fa">
+                    <label for="enable-2fa">Enable Two-Factor Authentication (Recommended)</label>
+                </div>
+                <button type="submit" class="btn-full" id="setup-btn">Create Account</button>
+            </form>
+
+            <div id="qr-section" class="qr-section">
+                <h3 style="margin-bottom: 16px;">Scan QR Code</h3>
+                <p class="info-text">Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+                </p>
+                <div class="qr-code" id="qr-code"></div>
+                <p class="info-text">Or manually enter this secret:</p>
+                <div class="secret-code" id="secret-code"></div>
+                <button class="btn-full" id="continue-btn">Continue to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/setup.js"></script>
+</body>
+
+</html>

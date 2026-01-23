@@ -76,20 +76,7 @@ class App {
     }
 
     setupUI() {
-        // Theme toggle - simple one-click toggle
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('light-theme');
-            // Store preference
-            const isLight = document.body.classList.contains('light-theme');
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
-        });
-
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') {
-            document.body.classList.add('light-theme');
-        }
+        // Theme toggle handled by theme.js
 
         // Restart Server button
         const restartServerBtn = document.getElementById('restart-server-btn');
@@ -120,6 +107,17 @@ class App {
                 }).catch(err => {
                     console.error('Failed to copy IP:', err);
                 });
+            });
+        }
+
+        // Logout button
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                // Clear auth token
+                localStorage.removeItem('auth_token');
+                // Redirect to login
+                window.location.href = '/login';
             });
         }
 

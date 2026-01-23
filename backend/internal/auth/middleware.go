@@ -54,6 +54,12 @@ func extractToken(r *http.Request) string {
 		return cookie.Value
 	}
 
+	// Try query parameter (for WebSocket)
+	queryToken := r.URL.Query().Get("token")
+	if queryToken != "" {
+		return queryToken
+	}
+
 	return ""
 }
 

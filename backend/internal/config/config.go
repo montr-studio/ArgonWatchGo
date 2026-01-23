@@ -165,3 +165,84 @@ func LoadConfig(path string) (*Config, error) {
 
 	return &cfg, nil
 }
+
+// GenerateDefaultConfig creates a default configuration
+func GenerateDefaultConfig() *Config {
+	return &Config{
+		Server: ServerConfig{
+			Port: 3000,
+			Host: "0.0.0.0",
+		},
+		Monitoring: MonitoringConfig{
+			SystemInterval:   2000,
+			RunnerInterval:   5000,
+			PM2Interval:      5000,
+			ServicesInterval: 30000,
+		},
+		Storage: StorageConfig{
+			Enabled:       true,
+			RetentionDays: 7,
+			DataPath:      "./data",
+		},
+		Auth: AuthConfig{
+			Enabled:         true,
+			JWTSecret:       "CHANGE-THIS-TO-A-SECURE-RANDOM-SECRET-KEY",
+			TokenExpiration: 24,
+			UsersFile:       "./data/users.json",
+		},
+		Alerts: AlertsConfig{
+			Enabled: true,
+			Rules:   []AlertRule{},
+		},
+		Notifications: NotificationsConfig{
+			Desktop: DesktopNotification{Enabled: false},
+			Email:   EmailNotification{Enabled: false},
+			Discord: WebhookNotification{Enabled: false},
+			Slack:   WebhookNotification{Enabled: false},
+		},
+		Services:      []ServiceConfig{},
+		Databases:     []DatabaseConfig{},
+		GithubRunner:  GithubRunnerConfig{},
+		PM2:           PM2Config{PM2User: "root"},
+		Terminal:      TerminalConfig{Enabled: false, Shell: "/bin/bash", SessionTimeout: 3600000},
+		Permissions:   PermissionsConfig{UseSudo: false, RunAsUser: "root"},
+		QuickCommands: []QuickCommand{},
+	}
+}
+
+// SaveConfig saves configuration to a file
+func SaveConfig(cfg *Config, path string) error {
+	data, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0644)
+}
+
+// Sanitize returns a copy of the config with sensitive information masked
+func (c *Config) Sanitize() *Config {
+	// Create a deep copy (or just copy struct if simple, but we have slices)
+	// For simplicity, we marshal/unmarshal or just manually copy relevant fields
+	// Since we just want to mask specific fields for API response:
+
+	clone := *c // Shallow copy
+
+	// Mask Auth Secret
+	clone.Auth.JWTSecret = "***HIDDEN***"
+
+	// Mask SMTP Password
+	clone.Notifications.Email.SMTP.Auth.Pass = "***HIDDEN***"
+
+	// Mask Database Passwords if any
+	// We'd need to deep copy the slice to avoid modifying original
+	if len(c.Databases) > 0 {
+		dbs := make([]DatabaseConfig, len(c.Databases))
+		copy(dbs, c.Databases)
+		for i := range dbs {
+			dbs[i].Password = "***HIDDEN***"
+		}
+		clone.Databases = dbs
+	}
+
+	return &clone
+}

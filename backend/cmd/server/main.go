@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,10 +22,17 @@ import (
 func main() {
 	// 1. Load Configuration
 	configPath := "config.json"
+
+	// Check if config exists, if not create default
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		configPath = "../config/config.json"
-		if _, err := os.Stat(configPath); os.IsNotExist(err) {
-			log.Println("Config file not found in ./config.json or ../config/config.json")
+		log.Println("Config file not found, creating default config.json...")
+		defaultCfg := config.GenerateDefaultConfig()
+		if err := config.SaveConfig(defaultCfg, configPath); err != nil {
+			log.Printf("Warning: Failed to create default config: %v", err)
+			// Try fallback location
+			configPath = "../config/config.json"
+		} else {
+			log.Println("✓ Created default config.json - Please review and update the jwtSecret!")
 		}
 	}
 
@@ -101,11 +110,35 @@ func main() {
 	// 9. Setup Auth Manager
 	var authManager *auth.Manager
 	if cfg.Auth.Enabled {
-		// Set defaults if not configured
-		if cfg.Auth.JWTSecret == "" {
-			cfg.Auth.JWTSecret = "change-this-secret-key-in-production"
-			log.Println("WARNING: Using default JWT secret. Please set a secure secret in config.json")
+		// Env Var Overrides
+		if envSecret := os.Getenv("JWT_SECRET"); envSecret != "" {
+			cfg.Auth.JWTSecret = envSecret
 		}
+
+		// Check for default or weak secret
+		if cfg.Auth.JWTSecret == "CHANGE-THIS-TO-A-SECURE-RANDOM-SECRET-KEY" || cfg.Auth.JWTSecret == "change-this-secret-key-in-production" {
+			// Generate a new secure secret
+			log.Println("⚠️  Default JWT secret detected. Generating a new secure secret...")
+			randomBytes := make([]byte, 32)
+			_, err := rand.Read(randomBytes)
+			if err != nil {
+				log.Fatalf("Failed to generate random secret: %v", err)
+			}
+			cfg.Auth.JWTSecret = base64.StdEncoding.EncodeToString(randomBytes)
+
+			// Save the new secret so valid tokens persist across restarts
+			if err := config.SaveConfig(cfg, configPath); err != nil {
+				log.Printf("Warning: Failed to save config with new secret: %v", err)
+			} else {
+				log.Println("✓ Updated config.json with new secure JWT secret")
+			}
+		}
+
+		// SMTP Password from Env
+		if smtpPass := os.Getenv("SMTP_PASSWORD"); smtpPass != "" {
+			cfg.Notifications.Email.SMTP.Auth.Pass = smtpPass
+		}
+
 		if cfg.Auth.TokenExpiration == 0 {
 			cfg.Auth.TokenExpiration = 24 // 24 hours default
 		}
@@ -125,15 +158,16 @@ func main() {
 		}
 	}
 
-	// 10. Setup Router
-	r := api.NewRouter(cfg, hub, store, alertEngine, authManager)
-
-	// 10. Serve Embedded Frontend
+	// 10. Load Frontend Assets
 	frontendFS, err := assets.GetFrontendAssets()
 	if err != nil {
 		log.Fatalf("Failed to get frontend assets: %v", err)
 	}
 
+	// 11. Setup Router
+	r := api.NewRouter(cfg, hub, store, alertEngine, authManager, frontendFS)
+
+	// Serve static files (CSS, JS, images, etc.)
 	fileServer := http.FileServer(http.FS(frontendFS))
 	r.PathPrefix("/").Handler(fileServer)
 

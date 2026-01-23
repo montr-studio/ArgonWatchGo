@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"io/fs"
 	"net/http"
 
 	"argon-watch-go/internal/alerts"
@@ -13,7 +14,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func NewRouter(cfg *config.Config, hub *realtime.Hub, store *storage.Storage, ae *alerts.AlertEngine, authManager *auth.Manager) *mux.Router {
+func NewRouter(cfg *config.Config, hub *realtime.Hub, store *storage.Storage, ae *alerts.AlertEngine, authManager *auth.Manager, frontendFS fs.FS) *mux.Router {
 	r := mux.NewRouter()
 
 	// Public auth routes (no authentication required)
@@ -23,6 +24,15 @@ func NewRouter(cfg *config.Config, hub *realtime.Hub, store *storage.Storage, ae
 	authRoutes.HandleFunc("/login", authManager.HandleLogin).Methods("POST")
 	authRoutes.HandleFunc("/verify-2fa", authManager.HandleVerify2FA).Methods("POST")
 	authRoutes.HandleFunc("/logout", authManager.HandleLogout).Methods("POST")
+
+	// Serve setup and login pages (public access)
+	r.HandleFunc("/setup", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFileFS(w, r, frontendFS, "setup.html")
+	}).Methods("GET")
+
+	r.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFileFS(w, r, frontendFS, "login.html")
+	}).Methods("GET")
 
 	// Protected routes (authentication required)
 	if cfg.Auth.Enabled {
@@ -61,7 +71,7 @@ func NewRouter(cfg *config.Config, hub *realtime.Hub, store *storage.Storage, ae
 func getConfigHandler(cfg *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(cfg)
+		json.NewEncoder(w).Encode(cfg.Sanitize())
 	}
 }
 

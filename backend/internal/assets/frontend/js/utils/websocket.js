@@ -8,7 +8,13 @@ export class WebSocketClient {
     }
 
     connect() {
-        this.ws = new WebSocket(this.url);
+        // Get auth token from localStorage
+        const token = localStorage.getItem('auth_token');
+
+        // Add token to WebSocket URL as query parameter
+        const wsUrl = token ? `${this.url}?token=${encodeURIComponent(token)}` : this.url;
+
+        this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
             console.log('Connected to server');
