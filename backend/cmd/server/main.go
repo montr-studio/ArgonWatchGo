@@ -10,6 +10,7 @@ import (
 	"argon-watch-go/internal/alerts"
 	"argon-watch-go/internal/api"
 	"argon-watch-go/internal/assets"
+	"argon-watch-go/internal/auth"
 	"argon-watch-go/internal/config"
 	"argon-watch-go/internal/monitor"
 	"argon-watch-go/internal/realtime"
@@ -97,8 +98,35 @@ func main() {
 	)
 	pm2Mon.Start()
 
-	// 9. Setup Router
-	r := api.NewRouter(cfg, hub, store, alertEngine)
+	// 9. Setup Auth Manager
+	var authManager *auth.Manager
+	if cfg.Auth.Enabled {
+		// Set defaults if not configured
+		if cfg.Auth.JWTSecret == "" {
+			cfg.Auth.JWTSecret = "change-this-secret-key-in-production"
+			log.Println("WARNING: Using default JWT secret. Please set a secure secret in config.json")
+		}
+		if cfg.Auth.TokenExpiration == 0 {
+			cfg.Auth.TokenExpiration = 24 // 24 hours default
+		}
+		if cfg.Auth.UsersFile == "" {
+			cfg.Auth.UsersFile = "../data/users.json"
+		}
+
+		am, err := auth.NewManager(cfg.Auth.UsersFile, cfg.Auth.JWTSecret, cfg.Auth.TokenExpiration)
+		if err != nil {
+			log.Fatalf("Failed to initialize auth manager: %v", err)
+		}
+		authManager = am
+
+		// Check if setup is required
+		if !authManager.GetUserStore().HasUsers() {
+			log.Println("⚠️  No users found. Please complete initial setup at /setup")
+		}
+	}
+
+	// 10. Setup Router
+	r := api.NewRouter(cfg, hub, store, alertEngine, authManager)
 
 	// 10. Serve Embedded Frontend
 	frontendFS, err := assets.GetFrontendAssets()

@@ -104,7 +104,9 @@
     },
     "auth": {
         "enabled": true,
-        "token": "your-secret-token-here-change-this"
+        "jwtSecret": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", 
+        "tokenExpiration": 24,
+        "usersFile": "../data/users.json"
     },
     "permissions": {
         "useSudo": false,

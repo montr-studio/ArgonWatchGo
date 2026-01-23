@@ -6,19 +6,19 @@ import (
 )
 
 type Config struct {
-	Server       ServerConfig       `json:"server"`
-	Monitoring   MonitoringConfig   `json:"monitoring"`
-	Storage      StorageConfig      `json:"storage"`
-	Alerts       AlertsConfig       `json:"alerts"`
+	Server        ServerConfig        `json:"server"`
+	Monitoring    MonitoringConfig    `json:"monitoring"`
+	Storage       StorageConfig       `json:"storage"`
+	Alerts        AlertsConfig        `json:"alerts"`
 	Notifications NotificationsConfig `json:"notifications"`
-	Services     []ServiceConfig    `json:"services"`
-	Databases    []DatabaseConfig   `json:"databases"`
-	GithubRunner GithubRunnerConfig `json:"githubRunner"`
-	PM2          PM2Config          `json:"pm2"`
-	Terminal     TerminalConfig     `json:"terminal"`
-	Auth         AuthConfig         `json:"auth"`
-	Permissions  PermissionsConfig  `json:"permissions"`
-	QuickCommands []QuickCommand    `json:"quickCommands"`
+	Services      []ServiceConfig     `json:"services"`
+	Databases     []DatabaseConfig    `json:"databases"`
+	GithubRunner  GithubRunnerConfig  `json:"githubRunner"`
+	PM2           PM2Config           `json:"pm2"`
+	Terminal      TerminalConfig      `json:"terminal"`
+	Auth          AuthConfig          `json:"auth"`
+	Permissions   PermissionsConfig   `json:"permissions"`
+	QuickCommands []QuickCommand      `json:"quickCommands"`
 }
 
 type ServerConfig struct {
@@ -131,8 +131,10 @@ type TerminalConfig struct {
 }
 
 type AuthConfig struct {
-	Enabled bool   `json:"enabled"`
-	Token   string `json:"token"`
+	Enabled         bool   `json:"enabled"`
+	JWTSecret       string `json:"jwtSecret"`
+	TokenExpiration int    `json:"tokenExpiration"` // in hours
+	UsersFile       string `json:"usersFile"`
 }
 
 type PermissionsConfig struct {

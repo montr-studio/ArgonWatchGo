@@ -1,0 +1,14 @@
+[Unit]
+Description=ArgonWatchGo Server Monitor
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/etc/argon-watch-go
+ExecStart=/usr/local/bin/argon-watch-go
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
