@@ -72,8 +72,12 @@ func main() {
 	alertEngine := alerts.NewAlertEngine(cfg.Alerts, cfg.Notifications, hub.Broadcast)
 
 	// 5. Setup System Monitor
+	sysInterval := cfg.Monitoring.SystemInterval
+	if sysInterval <= 0 {
+		sysInterval = 2000
+	}
 	sysMon := monitor.NewSystemMonitor(
-		time.Duration(cfg.Monitoring.SystemInterval)*time.Millisecond,
+		time.Duration(sysInterval)*time.Millisecond,
 		hub.Broadcast,
 		store,
 		alertEngine,
@@ -81,16 +85,20 @@ func main() {
 	sysMon.Start()
 
 	// 6. Setup Service Monitor
+	svcInterval := cfg.Monitoring.ServicesInterval
+	if svcInterval <= 0 {
+		svcInterval = 30000
+	}
 	svcMon := monitor.NewServiceMonitor(
 		cfg.Services,
-		time.Duration(cfg.Monitoring.ServicesInterval)*time.Millisecond,
+		time.Duration(svcInterval)*time.Millisecond,
 		hub.Broadcast,
 	)
 	svcMon.Start()
 
 	// 7. Setup Database Monitor
 	dbInterval := cfg.Monitoring.ServicesInterval
-	if dbInterval == 0 {
+	if dbInterval <= 0 {
 		dbInterval = 30000
 	}
 	dbMon := monitor.NewDatabaseMonitor(
@@ -101,8 +109,12 @@ func main() {
 	dbMon.Start()
 
 	// 8. Setup PM2 Monitor
+	pm2Interval := cfg.Monitoring.PM2Interval
+	if pm2Interval <= 0 {
+		pm2Interval = 5000
+	}
 	pm2Mon := monitor.NewPM2Monitor(
-		time.Duration(cfg.Monitoring.PM2Interval)*time.Millisecond,
+		time.Duration(pm2Interval)*time.Millisecond,
 		hub.Broadcast,
 	)
 	pm2Mon.Start()
