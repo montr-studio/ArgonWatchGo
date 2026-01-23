@@ -22,7 +22,18 @@ CONFIG_DIR="/etc/argon-watch-go"
 DATA_DIR="/var/lib/argon-watch-go/data"
 SERVICE_FILE="/etc/systemd/system/argon-watch-go.service"
 BINARY_NAME="argon-watch-go"
-DOWNLOAD_URL="https://github.com/montr-studio/ArgonWatchGo/releases/latest/download/argon-watch-go-linux"
+# Determine Architecture
+ARCH=$(uname -m)
+if [ "$ARCH" = "x86_64" ]; then
+    BINARY_SUFFIX="linux-amd64"
+elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+    BINARY_SUFFIX="linux-arm64"
+else
+    echo "Error: Unsupported architecture: $ARCH"
+    exit 1
+fi
+
+DOWNLOAD_URL="https://github.com/montr-studio/ArgonWatchGo/releases/latest/download/argon-watch-go-$BINARY_SUFFIX"
 
 # Create directories
 echo "Creating directories..."
@@ -30,7 +41,7 @@ mkdir -p "$CONFIG_DIR"
 mkdir -p "$DATA_DIR"
 
 # Download binary
-echo "Downloading ArgonWatchGo..."
+echo "Downloading ArgonWatchGo for $ARCH..."
 if command -v wget &> /dev/null; then
     wget -O "$INSTALL_DIR/$BINARY_NAME" "$DOWNLOAD_URL"
 elif command -v curl &> /dev/null; then

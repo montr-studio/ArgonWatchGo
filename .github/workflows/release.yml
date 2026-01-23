@@ -18,21 +18,27 @@ jobs:
         with:
           go-version: '1.24.0'
 
-      - name: Build Linux Binary
+      - name: Build Linux AMD64
         run: |
           cd backend
-          GOOS=linux GOARCH=amd64 go build -o ../argon-watch-go-linux ./cmd/server/main.go
+          GOOS=linux GOARCH=amd64 go build -o ../argon-watch-go-linux-amd64 ./cmd/server/main.go
 
-      - name: Build Windows Binary
+      - name: Build Linux ARM64
         run: |
           cd backend
-          GOOS=windows GOARCH=amd64 go build -o ../argon-watch-go-windows.exe ./cmd/server/main.go
+          GOOS=linux GOARCH=arm64 go build -o ../argon-watch-go-linux-arm64 ./cmd/server/main.go
+
+      - name: Build Windows AMD64
+        run: |
+          cd backend
+          GOOS=windows GOARCH=amd64 go build -o ../argon-watch-go-windows-amd64.exe ./cmd/server/main.go
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            argon-watch-go-linux
-            argon-watch-go-windows.exe
+            argon-watch-go-linux-amd64
+            argon-watch-go-linux-arm64
+            argon-watch-go-windows-amd64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
