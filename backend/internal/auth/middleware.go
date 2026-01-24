@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -20,9 +19,6 @@ func Middleware(jwtManager *JWTManager) func(http.Handler) http.Handler {
 			// Extract token from Authorization header or cookie
 			token := extractToken(r)
 			if token == "" {
-				if r.URL.Path == "/ws" {
-					log.Printf("Debug Auth: No token found for WebSocket connection")
-				}
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
@@ -30,13 +26,13 @@ func Middleware(jwtManager *JWTManager) func(http.Handler) http.Handler {
 			// Validate token
 			claims, err := jwtManager.ValidateToken(token)
 			if err != nil {
-				log.Printf("Debug Auth: Invalid token for %s: %v", r.URL.Path, err)
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
 
 			// Add claims to context
 			ctx := context.WithValue(r.Context(), userContextKey, claims)
+
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
