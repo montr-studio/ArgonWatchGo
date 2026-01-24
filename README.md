@@ -182,6 +182,33 @@ sudo systemctl status argon-watch-go
 sudo journalctl -u argon-watch-go -f
 ```
 
+### Uninstallation
+
+To completely remove ArgonWatchGo from your Linux server:
+
+**One-Command Uninstall:**
+```bash
+curl -sSL https://raw.githubusercontent.com/montr-studio/ArgonWatchGo/main/scripts/uninstall-linux.sh | sudo bash
+```
+
+**Manual Uninstall:**
+```bash
+# Stop and disable service
+sudo systemctl stop argon-watch-go
+sudo systemctl disable argon-watch-go
+
+# Remove service file
+sudo rm /etc/systemd/system/argon-watch-go.service
+sudo systemctl daemon-reload
+
+# Remove binary
+sudo rm /usr/local/bin/argon-watch-go
+
+# Remove configuration and data
+sudo rm -rf /etc/argon-watch-go
+sudo rm -rf /var/lib/argon-watch-go
+```
+
 ---
 
 ## Build from Source
