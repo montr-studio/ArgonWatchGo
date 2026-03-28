@@ -16,7 +16,7 @@ Add database configurations to your `config/config.json` file in the `databases`
       "host": "localhost",
       "port": 27017,
       "database": "myapp",
-      "username": "admin",
+      "user": "admin",
       "password": "password"
     },
     {
@@ -26,17 +26,17 @@ Add database configurations to your `config/config.json` file in the `databases`
       "host": "localhost",
       "port": 3306,
       "database": "myapp",
-      "username": "root",
+      "user": "root",
       "password": "password"
     },
     {
       "id": "postgres-db",
       "name": "PostgreSQL",
-      "type": "postgresql",
+      "type": "postgres",
       "host": "localhost",
       "port": 5432,
       "database": "myapp",
-      "username": "postgres",
+      "user": "postgres",
       "password": "password"
     },
     {
@@ -51,6 +51,11 @@ Add database configurations to your `config/config.json` file in the `databases`
   ]
 }
 ```
+
+Notes:
+- Use `user`, not `username`, in new configs. The loader accepts both for backward compatibility.
+- Use `postgres` for PostgreSQL in new configs. `postgresql` is still accepted.
+- If `databases` is empty, the database card will stay hidden on the dashboard.
 
 ## Monitored Metrics
 

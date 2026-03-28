@@ -133,6 +133,73 @@
                 </div>
             </section>
 
+            <!-- Historical Graphs -->
+            <section class="card graphs-card">
+                <div class="card-header graphs-header">
+                    <div>
+                        <h2>Performance Trends</h2>
+                        <p class="card-subtitle">Live history for the core metrics that matter most during incidents and capacity reviews.</p>
+                    </div>
+                    <div class="time-range-selector">
+                        <label for="time-range">Window</label>
+                        <select id="time-range" class="time-range-dropdown">
+                            <option value="60">Last 1 Hour</option>
+                            <option value="120">Last 2 Hours</option>
+                            <option value="180">Last 3 Hours</option>
+                            <option value="360">Last 6 Hours</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="graph-summary-grid">
+                    <div class="graph-summary-chip">
+                        <span class="graph-summary-label">CPU Trend</span>
+                        <span class="graph-summary-value">Load spikes and recovery</span>
+                    </div>
+                    <div class="graph-summary-chip">
+                        <span class="graph-summary-label">Memory Trend</span>
+                        <span class="graph-summary-value">Pressure and saturation</span>
+                    </div>
+                    <div class="graph-summary-chip">
+                        <span class="graph-summary-label">Network Trend</span>
+                        <span class="graph-summary-value">Ingress and egress flow</span>
+                    </div>
+                    <div class="graph-summary-chip">
+                        <span class="graph-summary-label">Disk Trend</span>
+                        <span class="graph-summary-value">Storage growth pattern</span>
+                    </div>
+                </div>
+                <div class="graphs-grid">
+                    <div class="graph-item graph-item-cpu">
+                        <div class="graph-meta">
+                            <h3 class="graph-title">CPU Usage</h3>
+                            <span class="graph-badge">Live</span>
+                        </div>
+                        <canvas id="cpu-chart"></canvas>
+                    </div>
+                    <div class="graph-item graph-item-memory">
+                        <div class="graph-meta">
+                            <h3 class="graph-title">Memory Usage</h3>
+                            <span class="graph-badge">Capacity</span>
+                        </div>
+                        <canvas id="memory-chart"></canvas>
+                    </div>
+                    <div class="graph-item graph-item-network">
+                        <div class="graph-meta">
+                            <h3 class="graph-title">Network I/O</h3>
+                            <span class="graph-badge">Throughput</span>
+                        </div>
+                        <canvas id="network-chart"></canvas>
+                    </div>
+                    <div class="graph-item graph-item-disk">
+                        <div class="graph-meta">
+                            <h3 class="graph-title">Disk Usage</h3>
+                            <span class="graph-badge">Storage</span>
+                        </div>
+                        <canvas id="disk-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+
             <!-- Temperature Monitoring -->
             <section class="card temp-card" id="temp-card" style="display: none;">
                 <div class="card-header">
@@ -324,40 +391,6 @@
                 </div>
             </section>
 
-            <!-- Historical Graphs -->
-            <section class="card graphs-card">
-                <div class="card-header">
-                    <h2>📈 Historical Data</h2>
-                    <div class="time-range-selector">
-                        <label for="time-range">Time Range:</label>
-                        <select id="time-range" class="time-range-dropdown">
-                            <option value="60">Last 1 Hour</option>
-                            <option value="120">Last 2 Hours</option>
-                            <option value="180">Last 3 Hours</option>
-                            <option value="360">Last 6 Hours</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="graphs-grid">
-                    <div class="graph-item">
-                        <h3 class="graph-title">CPU Usage</h3>
-                        <canvas id="cpu-chart"></canvas>
-                    </div>
-                    <div class="graph-item">
-                        <h3 class="graph-title">Memory Usage</h3>
-                        <canvas id="memory-chart"></canvas>
-                    </div>
-                    <div class="graph-item">
-                        <h3 class="graph-title">Network I/O</h3>
-                        <canvas id="network-chart"></canvas>
-                    </div>
-                    <div class="graph-item">
-                        <h3 class="graph-title">Disk Usage</h3>
-                        <canvas id="disk-chart"></canvas>
-                    </div>
-                </div>
-            </section>
-
             <!-- Active Alerts -->
             <section class="card alerts-card" id="alerts-card" style="display: none;">
                 <div class="card-header">
@@ -398,6 +431,38 @@
                 </div>
             </section>
 
+            <!-- Database Monitoring -->
+            <section class="card databases-card" id="databases-card" style="display: none;">
+                <div class="card-header">
+                    <h2>Database Monitoring</h2>
+                    <span class="refresh-rate">
+                        <span class="live-dot"></span>
+                        Live
+                    </span>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Database</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Response Time</th>
+                                <th>Last Check</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="databases-table-body">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--text-secondary);">
+                                    No databases configured
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- GitHub Actions Runner -->
             <section class="card runner-card">
                 <div class="card-header">
@@ -429,14 +494,13 @@
         </main>
         <footer class="main-footer">
             <nav class="footer-nav">
-                <a href="#" class="footer-link">Language</a>
-                <a href="#" class="footer-link">Docs</a>
-                <a href="#" class="footer-link">Issues</a>
+                <a href="https://github.com/uvesarshad/ArgonWatchGo" class="footer-link">Docs</a>
+                <a href="https://github.com/uvesarshad/ArgonWatchGo/issues" class="footer-link">Issues</a>
                 <a href="#" class="footer-link">Contact</a>
                 <span class="footer-copyright">© 2026 <a href="https://github.com/uvesarshad/ArgonWatchGo.git"
                         target="_blank"
                         style="font-weight: bold; color: inherit; text-decoration: none;">ArgonWatchGo</a> by <a
-                        href="https://github.com/uvesarshad" target="_blank"
+                        href="https://x.com/uvesarshad" target="_blank"
                         style="font-weight: bold; color: inherit; text-decoration: none;">Uves Arshad</a></span>
             </nav>
         </footer>

@@ -63,6 +63,14 @@ class App {
             this.updatePm2Table(data);
         });
 
+        this.ws.on('SERVICE_STATUS', (data) => {
+            this.updateServicesTable(data);
+        });
+
+        this.ws.on('DATABASE_STATUS', (data) => {
+            this.updateDatabaseTable(data);
+        });
+
         this.ws.on('RUNNER_STATUS', (data) => {
             this.updateRunnerStatus(data);
         });
@@ -666,6 +674,161 @@ class App {
         }).join('');
     }
 
+    updateServicesTable(services) {
+        const card = document.getElementById('services-card');
+        const tbody = document.getElementById('services-table-body');
+
+        if (!card || !tbody) {
+            return;
+        }
+
+        if (!services || services.length === 0) {
+            card.style.display = 'none';
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-secondary);">
+                        No services configured
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        card.style.display = 'block';
+        tbody.innerHTML = services.map((service) => {
+            const statusClass = this.getStatusBadgeClass(service.status);
+            const responseTime = service.responseTime != null ? `${service.responseTime} ms` : '--';
+            const lastCheck = service.lastCheck ? new Date(service.lastCheck).toLocaleTimeString() : '--';
+
+            return `
+                <tr>
+                    <td><strong>${service.name}</strong></td>
+                    <td>${service.type}</td>
+                    <td><span class="runner-status-badge ${statusClass}">${service.status}</span></td>
+                    <td>${responseTime}</td>
+                    <td>${lastCheck}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    updateDatabaseTable(databases) {
+        const card = document.getElementById('databases-card');
+        const tbody = document.getElementById('databases-table-body');
+
+        if (!card || !tbody) {
+            return;
+        }
+
+        if (!databases || databases.length === 0) {
+            card.style.display = 'none';
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-secondary);">
+                        No databases configured
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        card.style.display = 'block';
+        tbody.innerHTML = databases.map((db) => {
+            const statusClass = this.getStatusBadgeClass(db.status);
+            const responseTime = db.responseTime != null ? `${db.responseTime} ms` : '--';
+            const lastCheck = db.lastCheck ? new Date(db.lastCheck).toLocaleTimeString() : '--';
+            const details = this.renderDatabaseDetails(db);
+
+            return `
+                <tr>
+                    <td><strong>${db.name}</strong></td>
+                    <td>${db.type}</td>
+                    <td><span class="runner-status-badge ${statusClass}">${db.status}</span></td>
+                    <td>${responseTime}</td>
+                    <td>${lastCheck}</td>
+                    <td>${details}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    renderDatabaseDetails(db) {
+        const details = [];
+
+        if (db.version) {
+            details.push(`<span class="metric-chip">Version: ${this.escapeHtml(this.compactVersion(db.version))}</span>`);
+        }
+
+        if (db.database) {
+            details.push(`<span class="metric-chip">DB: ${this.escapeHtml(db.database)}</span>`);
+        }
+
+        if (db.metrics?.connections?.current != null && db.metrics.connections.current !== 0) {
+            details.push(`<span class="metric-chip">Connections: ${db.metrics.connections.current}</span>`);
+        }
+
+        if (db.metrics?.activity?.operationsPerSecond) {
+            details.push(`<span class="metric-chip">Ops/s: ${db.metrics.activity.operationsPerSecond.toFixed(1)}</span>`);
+        }
+
+        if (db.metrics?.activity?.transactionsPerSecond) {
+            details.push(`<span class="metric-chip">Tx/s: ${db.metrics.activity.transactionsPerSecond.toFixed(1)}</span>`);
+        }
+
+        if (db.metrics?.cache?.hitRatio) {
+            details.push(`<span class="metric-chip">Cache Hit: ${db.metrics.cache.hitRatio.toFixed(1)}%</span>`);
+        }
+
+        if (db.metrics?.storage?.databaseSizeBytes) {
+            details.push(`<span class="metric-chip">Size: ${this.formatBytes(db.metrics.storage.databaseSizeBytes)}</span>`);
+        } else if (db.metrics?.storage?.dataSizeBytes) {
+            details.push(`<span class="metric-chip">Data: ${this.formatBytes(db.metrics.storage.dataSizeBytes)}</span>`);
+        }
+
+        if (db.metrics?.storage?.collections) {
+            details.push(`<span class="metric-chip">Collections: ${db.metrics.storage.collections}</span>`);
+        }
+
+        if (db.metrics?.memory?.residentBytes) {
+            details.push(`<span class="metric-chip">Resident RAM: ${this.formatBytes(db.metrics.memory.residentBytes)}</span>`);
+        }
+
+        const summary = db.message ? `<div class="metric-note">${this.escapeHtml(db.message)}</div>` : '';
+
+        if (details.length === 0) {
+            return summary || '--';
+        }
+
+        return `
+            <div class="metric-stack">
+                <div class="metric-chip-row">${details.join('')}</div>
+                ${summary}
+            </div>
+        `;
+    }
+
+    compactVersion(version) {
+        return version.length > 48 ? `${version.slice(0, 45)}...` : version;
+    }
+
+    formatBytes(bytes) {
+        if (!bytes || bytes < 0) {
+            return '--';
+        }
+
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let value = bytes;
+        let unitIndex = 0;
+
+        while (value >= 1024 && unitIndex < units.length - 1) {
+            value /= 1024;
+            unitIndex += 1;
+        }
+
+        const precision = value >= 10 || unitIndex === 0 ? 0 : 1;
+        return `${value.toFixed(precision)} ${units[unitIndex]}`;
+    }
+
     updateRunnerStatus(data) {
         const badge = document.getElementById('runner-badge');
         const jobName = document.getElementById('job-name');
@@ -693,6 +856,20 @@ class App {
         if (hours > 0) return `${hours}h`;
         if (minutes > 0) return `${minutes}m`;
         return `${seconds}s`;
+    }
+
+    getStatusBadgeClass(status) {
+        switch (status) {
+            case 'up':
+            case 'online':
+            case 'active':
+                return 'status-active';
+            case 'degraded':
+            case 'warning':
+                return 'status-idle';
+            default:
+                return 'status-offline';
+        }
     }
 
     executeProcAction(name, action) {

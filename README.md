@@ -2,6 +2,12 @@
 
 A lightweight, self-hostable server monitoring tool with comprehensive metrics and minimal resource usage.
 
+<p align="center">
+  <img src="assets/ArgonWatchGo_1.png" width="32%" />
+  <img src="assets/ArgonWatchGo_2.png" width="32%" />
+  <img src="assets/ArgonWatchGo_3.png" width="32%" />
+</p>
+
 ## Features
 
 ### ✅ **Enhanced System Resource Monitoring**
@@ -58,6 +64,22 @@ A lightweight, self-hostable server monitoring tool with comprehensive metrics a
 - **Protected routes** requiring authentication
 - **Initial setup wizard** for admin account creation
 
+---
+
+## 🚀 To-Do / Roadmap
+
+- [x] **Resource monitoring** - CPU, Memory, Disk, and Network tracking
+- [x] **PM2 monitoring** - Process management and stats
+- [ ] **Github runner monitoring** - Track status of self-hosted runners
+- [x] **MongoDB monitoring** - Connection and perf metrics
+- [x] **PostgreSQL monitoring** - Query performance and health
+- [ ] **Browser command line access** - Secure terminal in the browser
+- [ ] **Backup monitoring** - Status of automated backups
+- [ ] **Docker monitoring** - Container health and resource usage
+- [ ] **SSL Expiry tracking** - Monitor certificate expiration dates
+- [ ] **Notification system** - Discord/Slack/Telegram webhooks
+
+
 ## Installation
 
 ### Prerequisites
@@ -66,59 +88,31 @@ A lightweight, self-hostable server monitoring tool with comprehensive metrics a
 
 ---
 
-## Windows Installation
-
-### 1. Download the Binary
-Download the latest `argon-watch-go.exe` from the releases page.
-
-### 2. Create Configuration
-Create a `config.json` file in the same directory as the executable (see Configuration section below).
-
-### 3. Run the Application
-```powershell
-# Run directly
-.\argon-watch-go.exe
-
-# Or run in background with PowerShell
-Start-Process -NoNewWindow -FilePath ".\argon-watch-go.exe"
-```
-
-### 4. Access the Dashboard
-Open your browser and navigate to `http://localhost:3000`
-
-### 5. Complete Initial Setup
-- First-time users will be redirected to `/setup`
-- Create your admin account
-- Optionally enable 2FA by scanning the QR code with your authenticator app
-- Login and start monitoring!
-
-### Running as Windows Service (Optional)
-To run ArgonWatchGo as a Windows service, you can use [NSSM (Non-Sucking Service Manager)](https://nssm.cc/):
-
-```powershell
-# Download NSSM and install the service
-nssm install ArgonWatchGo "C:\path\to\argon-watch-go.exe"
-nssm set ArgonWatchGo AppDirectory "C:\path\to"
-nssm start ArgonWatchGo
-```
-
----
-
 ## Linux Installation
 
 ### Quick Install (Recommended)
+
 One-command installation with automatic systemd service setup:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/uvesarshad/ArgonWatchGo/main/scripts/install-linux.sh | sudo bash
 ```
 
-This script will:
+The installer will:
 - Download the latest binary
 - Create a systemd service
 - Enable auto-start on boot
-- Create default configuration
+- Create a default configuration automatically
+- Generate a JWT secret automatically
 - Start the service
+
+After installation:
+- Visit `http://YOUR_SERVER_IP:3000`
+- If you are using a reverse proxy, visit your domain instead
+- Complete the initial setup wizard to create your admin account
+- Start monitoring immediately
+
+You do not need to manually create `config.json` for the first launch. Use the [Configuration](#configuration) section later if you want to customize ports, services, databases, alerts, or authentication settings.
 
 ### Manual Installation
 
@@ -182,6 +176,12 @@ sudo systemctl status argon-watch-go
 sudo journalctl -u argon-watch-go -f
 ```
 
+After manual installation:
+- Open `http://YOUR_SERVER_IP:3000`
+- First-time users will be redirected to `/setup`
+- Create your admin account
+- Optionally enable 2FA by scanning the QR code with your authenticator app
+
 ### Uninstallation
 
 To completely remove ArgonWatchGo from your Linux server:
@@ -207,6 +207,44 @@ sudo rm /usr/local/bin/argon-watch-go
 # Remove configuration and data
 sudo rm -rf /etc/argon-watch-go
 sudo rm -rf /var/lib/argon-watch-go
+```
+
+---
+
+## Windows Installation
+
+### 1. Download the Binary
+Download the latest `argon-watch-go.exe` from the releases page.
+
+### 2. Create Configuration
+Create a `config.json` file in the same directory as the executable (see Configuration section below).
+
+### 3. Run the Application
+```powershell
+# Run directly
+.\argon-watch-go.exe
+
+# Or run in background with PowerShell
+Start-Process -NoNewWindow -FilePath ".\argon-watch-go.exe"
+```
+
+### 4. Access the Dashboard
+Open your browser and navigate to `http://localhost:3000`
+
+### 5. Complete Initial Setup
+- First-time users will be redirected to `/setup`
+- Create your admin account
+- Optionally enable 2FA by scanning the QR code with your authenticator app
+- Login and start monitoring!
+
+### Running as Windows Service (Optional)
+To run ArgonWatchGo as a Windows service, you can use [NSSM (Non-Sucking Service Manager)](https://nssm.cc/):
+
+```powershell
+# Download NSSM and install the service
+nssm install ArgonWatchGo "C:\path\to\argon-watch-go.exe"
+nssm set ArgonWatchGo AppDirectory "C:\path\to"
+nssm start ArgonWatchGo
 ```
 
 ---
@@ -283,6 +321,55 @@ Create a `config.json` file:
   }
 }
 ```
+
+### Database Configuration
+
+Use the `databases` array in `config.json` to enable database monitoring. If `databases` is empty, no database panel will appear on the dashboard.
+
+Example:
+
+```json
+{
+  "databases": [
+    {
+      "id": "main-postgres",
+      "name": "Main PostgreSQL",
+      "type": "postgres",
+      "host": "127.0.0.1",
+      "port": 5432,
+      "user": "postgres",
+      "password": "your-password",
+      "database": "app"
+    },
+    {
+      "id": "main-mongo",
+      "name": "Main MongoDB",
+      "type": "mongodb",
+      "host": "127.0.0.1",
+      "port": 27017,
+      "user": "admin",
+      "password": "your-password",
+      "database": "admin"
+    },
+    {
+      "id": "cache",
+      "name": "Redis Cache",
+      "type": "redis",
+      "host": "127.0.0.1",
+      "port": 6379,
+      "password": "your-password",
+      "database": 0
+    }
+  ]
+}
+```
+
+Notes:
+- Use `user` for the database username
+- Use `postgres` for PostgreSQL
+- `postgresql` and `username` are still accepted for backward compatibility
+- Redis `database` values can be numeric
+- See [Database Monitoring Docs](docs/DATABASE_MONITORING.md) for more examples and metric details
 
 ### Authentication Configuration
 

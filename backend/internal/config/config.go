@@ -3,6 +3,8 @@ package config
 import (
 	"encoding/json"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type Config struct {
@@ -112,6 +114,66 @@ type DatabaseConfig struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
 	Database string `json:"database"`
+}
+
+func (d *DatabaseConfig) UnmarshalJSON(data []byte) error {
+	type rawDatabaseConfig struct {
+		ID       string          `json:"id"`
+		Name     string          `json:"name"`
+		Type     string          `json:"type"`
+		Host     string          `json:"host"`
+		Port     int             `json:"port"`
+		User     string          `json:"user"`
+		Username string          `json:"username"`
+		Password string          `json:"password"`
+		Database json.RawMessage `json:"database"`
+	}
+
+	var raw rawDatabaseConfig
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	d.ID = raw.ID
+	d.Name = raw.Name
+	d.Type = normalizeDatabaseType(raw.Type)
+	d.Host = raw.Host
+	d.Port = raw.Port
+	d.User = raw.User
+	if d.User == "" {
+		d.User = raw.Username
+	}
+	d.Password = raw.Password
+	d.Database = decodeDatabaseName(raw.Database)
+
+	return nil
+}
+
+func decodeDatabaseName(raw json.RawMessage) string {
+	if len(raw) == 0 || string(raw) == "null" {
+		return ""
+	}
+
+	var asString string
+	if err := json.Unmarshal(raw, &asString); err == nil {
+		return asString
+	}
+
+	var asNumber int
+	if err := json.Unmarshal(raw, &asNumber); err == nil {
+		return strconv.Itoa(asNumber)
+	}
+
+	return ""
+}
+
+func normalizeDatabaseType(dbType string) string {
+	switch strings.ToLower(strings.TrimSpace(dbType)) {
+	case "postgresql":
+		return "postgres"
+	default:
+		return strings.ToLower(strings.TrimSpace(dbType))
+	}
 }
 
 type GithubRunnerConfig struct {
