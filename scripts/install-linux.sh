@@ -33,7 +33,7 @@ else
     exit 1
 fi
 
-DOWNLOAD_URL="https://github.com/montr-studio/ArgonWatchGo/releases/latest/download/argon-watch-go-$BINARY_SUFFIX"
+DOWNLOAD_URL="https://github.com/uvesarshad/ArgonWatchGo/releases/latest/download/argon-watch-go-$BINARY_SUFFIX"
 
 # Create directories
 echo "Creating directories..."

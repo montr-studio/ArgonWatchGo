@@ -110,7 +110,7 @@ nssm start ArgonWatchGo
 One-command installation with automatic systemd service setup:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/montr-studio/ArgonWatchGo/main/scripts/install-linux.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/uvesarshad/ArgonWatchGo/main/scripts/install-linux.sh | sudo bash
 ```
 
 This script will:
@@ -125,7 +125,7 @@ This script will:
 #### 1. Download the Binary
 ```bash
 # Download latest release
-wget https://github.com/montr-studio/ArgonWatchGo/releases/latest/download/argon-watch-go-linux
+wget https://github.com/uvesarshad/ArgonWatchGo/releases/latest/download/argon-watch-go-linux
 chmod +x argon-watch-go-linux
 sudo mv argon-watch-go-linux /usr/local/bin/argon-watch-go
 ```
@@ -188,7 +188,7 @@ To completely remove ArgonWatchGo from your Linux server:
 
 **One-Command Uninstall:**
 ```bash
-curl -sSL https://raw.githubusercontent.com/montr-studio/ArgonWatchGo/main/scripts/uninstall-linux.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/uvesarshad/ArgonWatchGo/main/scripts/uninstall-linux.sh | sudo bash
 ```
 
 **Manual Uninstall:**
